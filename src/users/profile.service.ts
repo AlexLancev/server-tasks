@@ -1,10 +1,41 @@
-import { v4 as uuidv4 } from 'uuid';
+import {
+  ResetPasswordDto,
+  SetPasswordDto,
+  UserRole,
+  ViewProfileDto,
+} from './dto';
 
 export class ProfileService {
-  getProfile() {
+  public getProfile(userId: string): ViewProfileDto {
     return {
-      id: uuidv4(),
-      name: 'John Doe',
+      id: userId,
+      role: UserRole.USER,
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+    };
+  }
+
+  public resetPassword(data: ResetPasswordDto): ResetPasswordDto {
+    return {
+      email: data.email,
+    };
+  }
+
+  public setPassword(data: SetPasswordDto): SetPasswordDto {
+    return {
+      token: data.token,
+      password: data.password,
+      email: data.email,
+    };
+  }
+
+  public findById(id: string): ViewProfileDto {
+    return {
+      id,
+      role: UserRole.USER,
+      firstName: 'John',
+      lastName: 'Doe',
       email: 'john.doe@example.com',
     };
   }
