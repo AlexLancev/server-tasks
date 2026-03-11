@@ -1,8 +1,8 @@
 import {
   ResetPasswordDto,
   SetPasswordDto,
-  UserRole,
   ViewProfileDto,
+  UserRole,
 } from './dto';
 
 export class ProfileService {
