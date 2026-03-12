@@ -6,7 +6,7 @@ import {
 } from './dto';
 
 export class ProfileService {
-  public getProfile(userId: string): ViewProfileDto {
+  getProfile(userId: string): ViewProfileDto {
     return {
       id: userId,
       role: UserRole.USER,
