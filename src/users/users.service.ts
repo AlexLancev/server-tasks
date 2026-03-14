@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BanUserDto, CreateUserDto, UserStatus, ViewUserDto } from './dto';
 import { PrismaService } from 'src/prisma';
 import { randomUUID } from 'crypto';
@@ -10,6 +14,8 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateUserDto): Promise<ViewUserDto> {
+    await this.checkEmail(data.email);
+
     const user = await this.prisma.user.create({
       data: {
         ...data,
@@ -50,6 +56,10 @@ export class UsersService {
       throw new NotFoundException('Пользователь не найден');
     }
 
+    if (user.email !== data.email) {
+      await this.checkEmail(data.email);
+    }
+
     const updatedUser = await this.prisma.user.update({
       where: {
         id,
@@ -80,5 +90,15 @@ export class UsersService {
     });
 
     return this.mapper.mapOne(updatedUser);
+  }
+
+  private async checkEmail(email: string): Promise<void> {
+    const user = await this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+      select: { id: true },
+    });
+    if (user) {
+      throw new BadRequestException('Email уже занят');
+    }
   }
 }
