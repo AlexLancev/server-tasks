@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "user" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );

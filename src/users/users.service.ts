@@ -7,11 +7,15 @@ import { BanUserDto, CreateUserDto, UserStatus, ViewUserDto } from './dto';
 import { PrismaService } from 'src/prisma';
 import { randomUUID } from 'crypto';
 import { mapUserRoleToDB, UserViewMapper } from './mappers';
+import { PasswordResetService } from './password-reset.service';
 
 @Injectable()
 export class UsersService {
   private readonly mapper = new UserViewMapper();
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly passwordResetService: PasswordResetService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   async create(data: CreateUserDto): Promise<ViewUserDto> {
     await this.checkEmail(data.email);
@@ -28,6 +32,8 @@ export class UsersService {
         createdBy: randomUUID(),
       },
     });
+
+    await this.passwordResetService.createOrReplace(user.id, user.email);
 
     return this.mapper.mapOne(user);
   }

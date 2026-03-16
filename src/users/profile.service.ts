@@ -1,11 +1,15 @@
-import {
-  ResetPasswordDto,
-  SetPasswordDto,
-  ViewProfileDto,
-  UserRole,
-} from './dto';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { SetPasswordDto, ViewProfileDto, UserRole } from './dto';
+import { PasswordResetService } from './password-reset.service';
+import { PrismaService } from 'src/prisma';
+import { UserStatus } from 'generated/prisma/enums';
 
+@Injectable()
 export class ProfileService {
+  constructor(
+    private readonly passwordResetService: PasswordResetService,
+    private readonly prisma: PrismaService,
+  ) {}
   public getProfile(userId: string): ViewProfileDto {
     return {
       id: userId,
@@ -16,18 +20,33 @@ export class ProfileService {
     };
   }
 
-  public resetPassword(data: ResetPasswordDto): ResetPasswordDto {
-    return {
-      email: data.email,
-    };
+  public async resetPassword(email: string): Promise<void> {
+    const user = await this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+    });
+
+    if (!user) return;
+    if (user.status !== UserStatus.active) {
+      throw new ForbiddenException('Account is banned');
+    }
+
+    await this.passwordResetService.createOrReplace(user.id, email);
   }
 
-  public setPassword(data: SetPasswordDto): SetPasswordDto {
-    return {
-      token: data.token,
-      password: data.password,
-      email: data.email,
-    };
+  public async setPassword({
+    code,
+    email,
+    password,
+  }: SetPasswordDto): Promise<void> {
+    const user = await this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
+    });
+    if (!user) return;
+    if (user.status !== UserStatus.active) {
+      throw new ForbiddenException('Account is banned');
+    }
+
+    await this.passwordResetService.setPassword(user.id, code, password);
   }
 
   public findById(id: string): ViewProfileDto {

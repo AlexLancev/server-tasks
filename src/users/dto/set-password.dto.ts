@@ -2,11 +2,11 @@ import { IsEmail, IsStrongPassword, Length } from 'class-validator';
 
 export class SetPasswordDto {
   @Length(1, 100)
-  token: string;
+  code: string;
 
   @IsEmail()
-  password: string;
+  email: string;
 
   @IsStrongPassword()
-  email: string;
+  password: string;
 }

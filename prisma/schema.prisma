@@ -1,7 +1,7 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-  moduleFormat  = "cjs"
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -19,16 +19,28 @@ enum UserStatus {
   banned
 }
 
+model PasswordReset {
+  userId    String   @id @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  attempts  Int      @db.Integer @default(0)
+  code      String   @db.VarChar()
+  createdAt DateTime @map("created_at") @db.Timestamptz @default(now())
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+
+  @@map("password_reset")
+}
+
 model User {
-  id        String     @id @default(uuid())
-  role      UserRole   @default(user)
-  firstName String     @map("first_name") @db.VarChar()
-  lastName  String     @map("last_name") @db.VarChar()
-  email     String     @db.VarChar()
-  hash      String?    @db.VarChar()
-  status    UserStatus
-  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz()
-  createdBy String     @map("created_by") @db.Uuid()
+  id            String         @id @db.Uuid
+  role          UserRole       @default(user)
+  firstName     String         @map("first_name") @db.VarChar()
+  lastName      String         @map("last_name") @db.VarChar()
+  email         String         @db.VarChar() @unique
+  hash          String?        @db.VarChar()
+  status        UserStatus
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+  createdBy     String         @map("created_by") @db.Uuid()
+  passwordReset PasswordReset?
 
   @@map("user")
 }
