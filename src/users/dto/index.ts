@@ -6,3 +6,4 @@ export * from './view-profile.dto';
 export * from './view-user.dto';
 export * from './reset-password.dto';
 export * from './set-password.dto';
+export * from './password-reset-code.dto';

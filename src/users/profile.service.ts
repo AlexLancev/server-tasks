@@ -3,10 +3,12 @@ import { SetPasswordDto, ViewProfileDto, UserRole } from './dto';
 import { PasswordResetService } from './password-reset.service';
 import { PrismaService } from 'src/prisma';
 import { UserStatus } from 'generated/prisma/enums';
+import { HeloEmailService } from 'src/email';
 
 @Injectable()
 export class ProfileService {
   constructor(
+    private readonly heloEmailService: HeloEmailService,
     private readonly passwordResetService: PasswordResetService,
     private readonly prisma: PrismaService,
   ) {}
@@ -30,7 +32,12 @@ export class ProfileService {
       throw new ForbiddenException('Account is banned');
     }
 
-    await this.passwordResetService.createOrReplace(user.id, email);
+    const reset = await this.passwordResetService.createOrReplace(user.id);
+    await this.heloEmailService.send({
+      ...reset,
+      email: user.email,
+      name: user.firstName,
+    });
   }
 
   public async setPassword({

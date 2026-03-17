@@ -8,11 +8,13 @@ import { PrismaService } from 'src/prisma';
 import { randomUUID } from 'crypto';
 import { mapUserRoleToDB, UserViewMapper } from './mappers';
 import { PasswordResetService } from './password-reset.service';
+import { HeloEmailService } from 'src/email/helo-email.service';
 
 @Injectable()
 export class UsersService {
   private readonly mapper = new UserViewMapper();
   constructor(
+    private readonly heloEmailService: HeloEmailService,
     private readonly passwordResetService: PasswordResetService,
     private readonly prisma: PrismaService,
   ) {}
@@ -33,7 +35,12 @@ export class UsersService {
       },
     });
 
-    await this.passwordResetService.createOrReplace(user.id, user.email);
+    const reset = await this.passwordResetService.createOrReplace(user.id);
+    await this.heloEmailService.send({
+      ...reset,
+      email: user.email,
+      name: user.firstName,
+    });
 
     return this.mapper.mapOne(user);
   }
@@ -54,6 +61,24 @@ export class UsersService {
     }
     return this.mapper.mapOne(user);
   }
+
+  //  СТАРТ
+  async userDelete(id: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    await this.prisma.user.delete({
+      where: { id },
+    });
+  }
+  //  ФИНИШ
 
   async update(id: string, data: CreateUserDto): Promise<ViewUserDto> {
     const user = await this.prisma.user.findFirst({ where: { id } });

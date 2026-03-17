@@ -1,4 +1,4 @@
-export class PasswordResetEmailDto {
+export class PasswordResetEmailDTO {
   code: string;
   email: string;
   expiresAt: Date;

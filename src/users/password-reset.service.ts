@@ -4,13 +4,15 @@ import { Prisma } from 'generated/prisma/client';
 import { config } from 'src/common';
 import { PrismaService } from 'src/prisma';
 import * as argon2 from 'argon2';
+import { PasswordResetCodeDto } from './dto';
 
 @Injectable()
 export class PasswordResetService {
   constructor(private readonly prisma: PrismaService) {}
 
-  public async createOrReplace(userId: string, email: string): Promise<void> {
+  public async createOrReplace(userId: string): Promise<PasswordResetCodeDto> {
     const code = this.generateCode();
+    const expiresAt = this.expiresAt();
     const hash = await argon2.hash(code);
 
     const data: Prisma.PasswordResetUncheckedCreateInput = {
@@ -18,9 +20,8 @@ export class PasswordResetService {
       attempts: 0,
       code: hash,
       createdAt: new Date(),
-      expiresAt: this.expiresAt(),
+      expiresAt,
     };
-    console.warn(`Email sending feature is not implemented. ${email}`);
 
     await this.prisma.passwordReset.upsert({
       where: { userId },
@@ -28,7 +29,10 @@ export class PasswordResetService {
       update: data,
     });
 
-    console.warn('Password reset created or replaced for user: ', email);
+    return {
+      code,
+      expiresAt,
+    };
   }
 
   public async setPassword(
