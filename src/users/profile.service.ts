@@ -1,9 +1,14 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { SetPasswordDto, ViewProfileDto, UserRole } from './dto';
 import { PasswordResetService } from './password-reset.service';
 import { PrismaService } from 'src/prisma';
 import { UserStatus } from 'generated/prisma/enums';
 import { HeloEmailService } from 'src/email';
+import { mapUserRoleFromDB } from './mappers';
 
 @Injectable()
 export class ProfileService {
@@ -12,13 +17,27 @@ export class ProfileService {
     private readonly passwordResetService: PasswordResetService,
     private readonly prisma: PrismaService,
   ) {}
-  public getProfile(userId: string): ViewProfileDto {
+  public async getProfile(id: string): Promise<ViewProfileDto> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        role: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
     return {
-      id: userId,
-      role: UserRole.USER,
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
+      id,
+      role: mapUserRoleFromDB(user.role),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
     };
   }
 

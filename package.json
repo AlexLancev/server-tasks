@@ -11,7 +11,7 @@
     "start": "dotenv -- nest start",
     "start:dev": " dotenv -- nest start --watch",
     "start:debug": " dotenv -- nest start --debug --watch",
-    "start:prod": "npx migrate:prod && node dist/main",
+    "start:prod": "npm run migrate:prod && npm run prisma:generate && npx prisma db seed && node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -32,6 +32,7 @@
     "class-validator": "^0.15.1",
     "convict": "^6.2.4",
     "handlebars": "^4.7.8",
+    "jsonwebtoken": "^9.0.3",
     "nodemailer": "^8.0.2",
     "prisma": "^6.19.2",
     "reflect-metadata": "^0.2.2",
@@ -47,6 +48,7 @@
     "@types/convict": "^6.1.6",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.10.7",
     "@types/nodemailer": "^7.0.11",
     "@types/supertest": "^6.0.2",
@@ -83,5 +85,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "node dist/prisma/seed/seed"
   }
 }

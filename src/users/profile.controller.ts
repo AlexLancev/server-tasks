@@ -8,15 +8,15 @@ import {
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { ResetPasswordDto, SetPasswordDto, ViewProfileDto } from './dto';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @Get()
-  getProfile(): ViewProfileDto {
-    return this.profileService.getProfile(uuidv4());
+  getProfile(): Promise<ViewProfileDto> {
+    return this.profileService.getProfile(randomUUID());
   }
 
   @Post('reset')

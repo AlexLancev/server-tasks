@@ -1,4 +1,5 @@
 import convict from 'convict';
+import { randomBytes } from 'crypto';
 
 const schema = convict({
   port: {
@@ -8,6 +9,12 @@ const schema = convict({
     env: 'PORT',
   },
   email: {
+    disabled: {
+      doc: 'Disable email service',
+      format: Boolean,
+      default: false,
+      env: 'EMAIL_DISABLED',
+    },
     service: {
       doc: 'Email service',
       format: String,
@@ -51,6 +58,20 @@ const schema = convict({
       env: 'FRONTEND_CONFIRM_URL',
     },
   },
+  jwt: {
+    secret: {
+      doc: 'JWT secret',
+      format: String,
+      default: randomBytes(32).toString('base64url'),
+      env: 'JWT_SECRET',
+    },
+    expirationSeconds: {
+      doc: 'JWT expiration seconds',
+      format: Number,
+      default: 3_600,
+      env: 'JWT_EXPIRATION_SECONDS',
+    },
+  },
   password: {
     code: {
       min: {
@@ -77,6 +98,32 @@ const schema = convict({
         default: 3,
         env: 'PASSWORD_RESET_ATTEMPTS',
       },
+    },
+  },
+  seedUser: {
+    email: {
+      doc: 'Initial user email',
+      format: String,
+      default: '',
+      env: 'USER_EMAIL',
+    },
+    password: {
+      doc: 'Initial user password',
+      format: String,
+      default: '',
+      env: 'USER_PASSWORD',
+    },
+    firstName: {
+      doc: 'Initial user first name',
+      format: String,
+      default: '',
+      env: 'USER_FIRST_NAME',
+    },
+    lastName: {
+      doc: 'Initial user last name',
+      format: String,
+      default: '',
+      env: 'USER_LAST_NAME',
     },
   },
 });
