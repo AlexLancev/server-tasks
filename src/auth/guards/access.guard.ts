@@ -8,7 +8,7 @@ export class AccessGuard implements CanActivate {
     config.jwt.secret,
     config.jwt.expirationSeconds,
   );
-  
+
   canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractToken(request);
