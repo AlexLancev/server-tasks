@@ -12,7 +12,7 @@ export class AccessGuard implements CanActivate {
   canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractToken(request);
-  } 
+  }
 
   private extractToken(request: Request): string | null {
     const authorization = request.headers.authorization ?? null;
